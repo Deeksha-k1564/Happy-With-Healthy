@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-
+import { apiUrl } from "../api"
 function MyOrders({ customer, onBack, onTrackOrder }) {
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
@@ -22,8 +22,13 @@ function MyOrders({ customer, onBack, onTrackOrder }) {
 
     try {
       const response = await fetch(
-        `http://127.0.0.1:5000/api/customers/${customer.id}/orders`
-      )
+  apiUrl(`/api/customers/${customer.id}/orders`),
+  {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  }
+)
 
       const data = await response.json()
 

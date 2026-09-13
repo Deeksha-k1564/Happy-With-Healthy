@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react"
-
+import { apiUrl } from "./api"
 function Favorites({ customer, onBack, onProductSelect }) {
   const [favorites, setFavorites] = useState([])
   const [loading, setLoading] = useState(true)
@@ -12,8 +12,13 @@ function Favorites({ customer, onBack, onProductSelect }) {
         setError("")
 
         const response = await fetch(
-          `http://127.0.0.1:5000/api/customers/${customer.id}/favorites`
-        )
+  apiUrl(`/api/customers/${customer.id}/favorites`),
+  {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  }
+)
 
         const data = await response.json()
 
@@ -38,11 +43,14 @@ function Favorites({ customer, onBack, onProductSelect }) {
   const removeFavorite = async (productId) => {
     try {
       const response = await fetch(
-        `http://127.0.0.1:5000/api/customers/${customer.id}/favorites/${productId}`,
-        {
-          method: "DELETE",
-        }
-      )
+  apiUrl(`/api/customers/${customer.id}/favorites/${productId}`),
+  {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  }
+)
 
       if (!response.ok) {
         throw new Error("Unable to remove favorite.")

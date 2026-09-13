@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { apiUrl } from "./api"
 import Cart from "./components/Cart"
 import Checkout from "./components/Checkout"
 import OrderConfirmation from "./components/OrderConfirmation"
@@ -46,7 +47,7 @@ function App() {
   const [adminLoggedIn, setAdminLoggedIn] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
 useEffect(() => {
-  fetch("http://127.0.0.1:5000/api/products")
+  fetch(apiUrl("/api/products"))
     .then((response) => {
       if (!response.ok) {
         throw new Error("Failed to fetch products")
@@ -74,8 +75,13 @@ useEffect(() => {
   const loadFavorites = async () => {
     try {
       const response = await fetch(
-        `http://127.0.0.1:5000/api/customers/${customer.id}/favorites`
-      )
+  apiUrl(`/api/customers/${customer.id}/favorites`),
+  {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  }
+)
 
       const data = await response.json()
 
@@ -132,11 +138,14 @@ const toggleFavorite = async (productId) => {
   try {
     if (isFavorite) {
       const response = await fetch(
-        `http://127.0.0.1:5000/api/customers/${customer.id}/favorites/${productId}`,
-        {
-          method: "DELETE",
-        }
-      )
+  apiUrl(`/api/customers/${customer.id}/favorites/${productId}`),
+  {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  }
+)
 
       if (!response.ok) {
         throw new Error("Unable to remove favorite.")
@@ -147,12 +156,13 @@ const toggleFavorite = async (productId) => {
       )
     } else {
       const response = await fetch(
-        `http://127.0.0.1:5000/api/customers/${customer.id}/favorites`,
+        apiUrl(`/api/customers/${customer.id}/favorites`),
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
-          },
+  Authorization: `Bearer ${localStorage.getItem("token")}`,
+  "Content-Type": "application/json",
+},
           body: JSON.stringify({
             product_id: productId,
           }),

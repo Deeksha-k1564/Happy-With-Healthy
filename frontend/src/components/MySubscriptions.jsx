@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-
+import { apiUrl } from "../api"
 function MySubscriptions({ customer, onBack }) {
   const [subscriptions, setSubscriptions] = useState([])
   const [loading, setLoading] = useState(true)
@@ -81,12 +81,15 @@ const handleCancel = async (subscriptionId) => {
   if (!confirmed) return
 
   try {
-    const response = await fetch(
-      `http://127.0.0.1:5000/api/subscriptions/${subscriptionId}/cancel`,
-      {
-        method: "PUT",
-      }
-    )
+  const response = await fetch(
+    apiUrl(`/api/subscriptions/${subscriptionId}/cancel`),
+    {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    }
+  )
 
     const data = await response.json()
 

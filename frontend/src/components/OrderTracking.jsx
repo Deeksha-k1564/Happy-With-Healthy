@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-
+import { apiUrl } from "../api"
 function OrderTracking({ order, onBack }) {
   const [currentOrder, setCurrentOrder] = useState(order)
   const [loading, setLoading] = useState(true)
@@ -41,9 +41,11 @@ function OrderTracking({ order, onBack }) {
   useEffect(() => {
     const fetchOrder = async () => {
       try {
-        const response = await fetch(
-          `http://127.0.0.1:5000/api/orders/${order.id}`
-        )
+        const response = await fetch(apiUrl(`/api/orders/${orderId}`), {
+  headers: {
+    Authorization: `Bearer ${localStorage.getItem("token")}`,
+  },
+})
 
         const data = await response.json()
 

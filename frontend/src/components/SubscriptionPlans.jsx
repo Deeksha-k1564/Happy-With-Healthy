@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { apiUrl } from "../api"
 function SubscriptionPlans({
   customer,
   onBack,
@@ -82,12 +83,13 @@ function SubscriptionPlans({
   try {
     // 1. Create subscription in our database
     const subscriptionResponse = await fetch(
-      "http://127.0.0.1:5000/api/subscriptions",
+  apiUrl("/api/subscriptions"),
       {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-        },
+  Authorization: `Bearer ${localStorage.getItem("token")}`,
+  "Content-Type": "application/json",
+},
         body: JSON.stringify({
           customer_id: customer.id,
           plan_name: selectedPlan.name,
