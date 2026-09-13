@@ -1,5 +1,5 @@
 import { useState } from "react"
-
+import { apiUrl } from "../api";
 function Login({ onLogin, onRegister, onBack }) {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -13,9 +13,7 @@ function Login({ onLogin, onRegister, onBack }) {
     setLoading(true)
 
     try {
-      const response = await fetch(
-        "http://127.0.0.1:5000/api/customers/login",
-        {
+      const response = await fetch(apiUrl("/api/customers/login"), {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
