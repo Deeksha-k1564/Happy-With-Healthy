@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { apiUrl } from "../api";
+import { apiUrl } from "./api";
 function Profile({ customer, onBack, onProfileUpdated }) {
   const [name, setName] = useState("")
   const [phone, setPhone] = useState("")
