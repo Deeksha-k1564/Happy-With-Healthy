@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-
+import { apiUrl } from "../api";
 function Profile({ customer, onBack, onProfileUpdated }) {
   const [name, setName] = useState("")
   const [phone, setPhone] = useState("")
@@ -19,14 +19,11 @@ function Profile({ customer, onBack, onProfileUpdated }) {
       }
 
       try {
-        const response = await fetch(
-            `http://127.0.0.1:5000/api/customers/${customer.id}`,
-            {
-                headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-            }
-            )
+        const response = await fetch(apiUrl(`/api/customers/${customer.id}`), {
+  headers: {
+    Authorization: `Bearer ${localStorage.getItem("token")}`,
+  },
+})
 
         const data = await response.json()
 
@@ -63,21 +60,11 @@ function Profile({ customer, onBack, onProfileUpdated }) {
     setSaving(true)
 
     try {
-      const response = await fetch(
-  `http://127.0.0.1:5000/api/customers/${customer.id}`,
-  {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-    body: JSON.stringify({
-      name,
-      phone,
-      address,
-    }),
-  }
-)
+      const response = await fetch(apiUrl(`/api/customers/${customer.id}`), {
+  headers: {
+    Authorization: `Bearer ${localStorage.getItem("token")}`,
+  },
+})
 
       const data = await response.json()
 

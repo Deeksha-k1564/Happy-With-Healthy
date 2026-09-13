@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-
+import { apiUrl } from "../api";
 const STATUS_OPTIONS = [
   "PLACED",
   "CONFIRMED",
@@ -62,9 +62,11 @@ function AdminDashboard({ onBack }) {
 
   const fetchOrders = async () => {
     try {
-      const response = await fetch(
-        "http://127.0.0.1:5000/api/orders"
-      )
+      const response = await fetch(apiUrl("/api/admin/orders"), {
+  headers: {
+    Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+  },
+})
 
       const data = await response.json()
 
@@ -90,9 +92,11 @@ function AdminDashboard({ onBack }) {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch(
-        "http://127.0.0.1:5000/api/products"
-      )
+      const response = await fetch(apiUrl("/api/admin/orders"), {
+  headers: {
+    Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+  },
+})
 
       const data = await response.json()
 
@@ -114,9 +118,11 @@ function AdminDashboard({ onBack }) {
   setSubscriptionsLoading(true)
 
   try {
-    const response = await fetch(
-      "http://127.0.0.1:5000/api/admin/subscriptions"
-    )
+    const response = await fetch(apiUrl("/api/admin/orders"), {
+  headers: {
+    Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+  },
+})
 
     const data = await response.json()
 
@@ -137,9 +143,11 @@ const fetchCustomers = async () => {
   setCustomersLoading(true)
 
   try {
-    const response = await fetch(
-      "http://127.0.0.1:5000/api/admin/customers"
-    )
+    const response = await fetch(apiUrl("/api/admin/orders"), {
+  headers: {
+    Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+  },
+})
 
     const data = await response.json()
 
@@ -160,9 +168,11 @@ const fetchCustomerOrders = async (customerId) => {
   setCustomerOrdersLoading(true)
 
   try {
-    const response = await fetch(
-      `http://127.0.0.1:5000/api/customers/${customerId}/orders`
-    )
+    const response = await fetch(apiUrl("/api/admin/orders"), {
+  headers: {
+    Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+  },
+})
 
     const data = await response.json()
 
@@ -214,18 +224,19 @@ const fetchCustomerOrders = async (customerId) => {
     setUpdatingId(orderId)
 
     try {
-      const response = await fetch(
-        `http://127.0.0.1:5000/api/orders/${orderId}/status`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            order_status: status,
-          }),
-        }
-      )
+  const response = await fetch(
+    apiUrl(`/api/orders/${orderId}/status`),
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+      },
+      body: JSON.stringify({
+        order_status: status,
+      }),
+    }
+  )
 
       const data = await response.json()
 
@@ -269,16 +280,17 @@ const fetchCustomerOrders = async (customerId) => {
     setProductMessage("")
 
     try {
-      const response = await fetch(
-        "http://127.0.0.1:5000/api/products",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(productForm),
-        }
-      )
+  const response = await fetch(
+    apiUrl("/api/products"),
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+      },
+      body: JSON.stringify(productForm),
+    }
+  )
 
       const data = await response.json()
 
@@ -327,12 +339,15 @@ const fetchCustomerOrders = async (customerId) => {
     }
 
     try {
-      const response = await fetch(
-        `http://127.0.0.1:5000/api/products/${product.id}`,
-        {
-          method: "DELETE",
-        }
-      )
+  const response = await fetch(
+    apiUrl(`/api/products/${product.id}`),
+    {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+      },
+    }
+  )
 
       const data = await response.json()
 
@@ -389,16 +404,17 @@ const fetchCustomerOrders = async (customerId) => {
     setEditLoading(true)
 
     try {
-      const response = await fetch(
-        `http://127.0.0.1:5000/api/products/${editingProduct.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(editForm),
-        }
-      )
+  const response = await fetch(
+    apiUrl(`/api/products/${editingProduct.id}`),
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+      },
+      body: JSON.stringify(editForm),
+    }
+  )
 
       const data = await response.json()
 

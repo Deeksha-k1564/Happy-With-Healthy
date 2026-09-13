@@ -113,17 +113,18 @@ function SubscriptionPlans({
 
     // 2. Create Razorpay order
     const paymentResponse = await fetch(
-      "http://127.0.0.1:5000/api/subscriptions/payment/create",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          subscription_id: subscriptionId,
-        }),
-      }
-    )
+  apiUrl("/api/subscriptions/payment/create"),
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+    body: JSON.stringify({
+      subscription_id: subscriptionId,
+    }),
+  }
+)
 
     const paymentData = await paymentResponse.json()
 
@@ -166,23 +167,24 @@ function SubscriptionPlans({
             setMessage("Verifying your payment...")
             
             const verifyResponse = await fetch(
-              "http://127.0.0.1:5000/api/subscriptions/payment/verify",
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  subscription_id: subscriptionId,
-                  razorpay_order_id:
-                    response.razorpay_order_id,
-                  razorpay_payment_id:
-                    response.razorpay_payment_id,
-                  razorpay_signature:
-                    response.razorpay_signature,
-                }),
-              }
-            )
+  apiUrl("/api/subscriptions/payment/verify"),
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+    body: JSON.stringify({
+      subscription_id: subscriptionId,
+      razorpay_order_id:
+        response.razorpay_order_id,
+      razorpay_payment_id:
+        response.razorpay_payment_id,
+      razorpay_signature:
+        response.razorpay_signature,
+    }),
+  }
+)
 
             const verifyData = await verifyResponse.json()
 

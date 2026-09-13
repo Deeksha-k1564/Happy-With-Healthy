@@ -49,19 +49,19 @@ function Checkout({ cart, customer, onBack, onOrderConfirmed }) {
     setCouponError("")
 
     try {
-      const response = await fetch(
-        "http://127.0.0.1:5000/api/coupons/validate",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            code: couponCode.trim(),
-            subtotal,
-          }),
-        }
-      )
+  const response = await fetch(
+    apiUrl("/api/coupons/validate"),
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        code: couponCode.trim(),
+        subtotal,
+      }),
+    }
+  )
 
       const data = await response.json()
 
@@ -187,28 +187,29 @@ function Checkout({ cart, customer, onBack, onOrderConfirmed }) {
           setError("")
 
           const verifyResponse = await fetch(
-            "http://127.0.0.1:5000/api/payment/verify",
-            {
-              method: "POST",
+  apiUrl("/api/payment/verify"),
+  {
+    method: "POST",
 
-              headers: {
-                "Content-Type": "application/json",
-              },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
 
-              body: JSON.stringify({
-                order_id: orderId,
+    body: JSON.stringify({
+      order_id: orderId,
 
-                razorpay_order_id:
-                  response.razorpay_order_id,
+      razorpay_order_id:
+        response.razorpay_order_id,
 
-                razorpay_payment_id:
-                  response.razorpay_payment_id,
+      razorpay_payment_id:
+        response.razorpay_payment_id,
 
-                razorpay_signature:
-                  response.razorpay_signature,
-              }),
-            }
-          )
+      razorpay_signature:
+        response.razorpay_signature,
+    }),
+  }
+)
 
           const verifyData =
             await verifyResponse.json()
@@ -316,36 +317,36 @@ function Checkout({ cart, customer, onBack, onOrderConfirmed }) {
       // ========================================================
 
       const orderResponse = await fetch(
-        "http://127.0.0.1:5000/api/orders",
-        {
-          method: "POST",
+  apiUrl("/api/orders"),
+  {
+    method: "POST",
 
-          headers: {
-            "Content-Type": "application/json",
-          },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
 
-          body: JSON.stringify({
-            customer_id: customer?.id,
+    body: JSON.stringify({
+      customer_id: customer?.id,
 
-            customer_name:
-              customerName.trim(),
+      customer_name:
+        customerName.trim(),
 
-            phone: phone.trim(),
+      phone: phone.trim(),
 
-            address: address.trim(),
+      address: address.trim(),
 
-            items: cart.map((item) => ({
-              product_id: item.id,
+      items: cart.map((item) => ({
+        product_id: item.id,
 
-              quantity: item.quantity,
-            })),
+        quantity: item.quantity,
+      })),
 
-            // Coupon information
-            coupon_code:
-              appliedCoupon?.code || null,
-          }),
-        }
-      )
+      coupon_code:
+        appliedCoupon?.code || null,
+    }),
+  }
+)
 
       console.log(
         "ORDER API STATUS:",
@@ -372,19 +373,20 @@ function Checkout({ cart, customer, onBack, onOrderConfirmed }) {
       // ========================================================
 
       const paymentResponse = await fetch(
-        "http://127.0.0.1:5000/api/payment/create",
-        {
-          method: "POST",
+  apiUrl("/api/payment/create"),
+  {
+    method: "POST",
 
-          headers: {
-            "Content-Type": "application/json",
-          },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
 
-          body: JSON.stringify({
-            order_id: orderData.order_id,
-          }),
-        }
-      )
+    body: JSON.stringify({
+      order_id: orderData.order_id,
+    }),
+  }
+)
 
       const paymentData =
         await paymentResponse.json()

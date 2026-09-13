@@ -13,9 +13,11 @@ function MySubscriptions({ customer, onBack }) {
 
     const loadSubscriptions = async () => {
       try {
-        const response = await fetch(
-          `http://127.0.0.1:5000/api/customers/${customer.id}/subscriptions`
-        )
+        const response = await fetch(apiUrl(`/api/customers/${customer.id}`), {
+  headers: {
+    Authorization: `Bearer ${localStorage.getItem("token")}`,
+  },
+})
 
         const data = await response.json()
 
