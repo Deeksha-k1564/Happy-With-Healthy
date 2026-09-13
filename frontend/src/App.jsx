@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { apiUrl } from "./api"
-import Cart from "./components/Cart"
+import Cart from "./components/Cart";
 import Checkout from "./components/Checkout"
 import OrderConfirmation from "./components/OrderConfirmation"
 import OrderTracking from "./components/OrderTracking"
