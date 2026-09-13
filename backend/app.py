@@ -9,7 +9,16 @@ app.config["JWT_SECRET_KEY"] = os.getenv(
     "JWT_SECRET",
     "happy-with-healthy-change-this-secret"
 )
-CORS(app)
+CORS(
+    app,
+    resources={
+        r"/api/*": {
+            "origins": [
+                "https://happy-with-healthy.onrender.com"
+            ]
+        }
+    }
+)
 
 app.register_blueprint(products_bp)
 
