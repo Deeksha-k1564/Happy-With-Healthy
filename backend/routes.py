@@ -158,6 +158,47 @@ def login_admin():
         "token": token
     }), 200
 
+@products_bp.route("/api/admin/orders", methods=["GET"])
+def get_admin_orders():
+    if not get_authenticated_admin():
+        return jsonify({"error": "Unauthorized"}), 401
+
+    conn = None
+    cursor = None
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT
+                o.id,
+                o.customer_id,
+                o.customer_name,
+                o.phone,
+                o.address,
+                o.total_amount,
+                o.order_status,
+                o.payment_status,
+                o.created_at
+            FROM orders o
+            ORDER BY o.created_at DESC
+        """)
+
+        orders = cursor.fetchall()
+
+        return jsonify(orders), 200
+
+    except Exception as e:
+        print("Admin orders error:", e)
+        return jsonify({"error": "Unable to load orders"}), 500
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
 
 # ============================================================
 # CUSTOMER REGISTRATION
