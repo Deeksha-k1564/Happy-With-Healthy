@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, request
 from flask_cors import CORS
 from routes import products_bp
 
@@ -21,6 +21,10 @@ CORS(
         }
     },
 )
+@app.before_request
+def handle_preflight():
+    if request.method == "OPTIONS":
+        return "", 200
 
 app.register_blueprint(products_bp)
 
