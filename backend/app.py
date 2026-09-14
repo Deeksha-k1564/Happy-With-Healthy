@@ -14,10 +14,12 @@ CORS(
     resources={
         r"/api/*": {
             "origins": [
-                "https://happy-with-healthy.onrender.com"
-            ]
+                "https://happy-with-healthy.onrender.com",
+            ],
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization"],
         }
-    }
+    },
 )
 
 app.register_blueprint(products_bp)
