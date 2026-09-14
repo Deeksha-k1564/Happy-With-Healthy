@@ -72,6 +72,9 @@ def get_authenticated_customer():
 # ============================================================
 
 def get_authenticated_admin():
+    if request.method == "OPTIONS":
+        return True
+
     auth_header = request.headers.get("Authorization", "")
 
     if not auth_header.startswith("Bearer "):
@@ -89,7 +92,10 @@ def get_authenticated_admin():
             algorithms=["HS256"]
         )
 
-        return payload.get("role") == "admin"
+        if payload.get("role") != "admin":
+            return False
+
+        return True
 
     except jwt.InvalidTokenError:
         return False
