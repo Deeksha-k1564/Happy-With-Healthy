@@ -1,5 +1,5 @@
 import { useState } from "react"
-
+import { apiUrl } from "../api"
 function Register({ onRegistered, onBackToLogin }) {
   const [form, setForm] = useState({
     name: "",

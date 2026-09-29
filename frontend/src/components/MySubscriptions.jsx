@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { apiUrl } from "../api"
+
 function MySubscriptions({ customer, onBack }) {
   const [subscriptions, setSubscriptions] = useState([])
   const [loading, setLoading] = useState(true)
@@ -13,11 +14,17 @@ function MySubscriptions({ customer, onBack }) {
 
     const loadSubscriptions = async () => {
       try {
-        const response = await fetch(apiUrl(`/api/customers/${customer.id}`), {
-  headers: {
-    Authorization: `Bearer ${localStorage.getItem("token")}`,
-  },
-})
+        setLoading(true)
+        setError("")
+
+        const response = await fetch(
+          apiUrl(`/api/customers/${customer.id}/subscriptions`),
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        )
 
         const data = await response.json()
 
@@ -27,9 +34,10 @@ function MySubscriptions({ customer, onBack }) {
           )
         }
 
-        setSubscriptions(data)
+        setSubscriptions(Array.isArray(data) ? data : [])
       } catch (err) {
-        console.error(err)
+        console.error("Subscriptions error:", err)
+
         setError(
           err.message || "Unable to load subscriptions."
         )
@@ -66,62 +74,64 @@ function MySubscriptions({ customer, onBack }) {
   }
 
   const formatDate = (date) => {
-  if (!date) return "-"
+    if (!date) return "-"
 
-  return new Date(date).toLocaleDateString("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  })
-}
-
-const handleCancel = async (subscriptionId) => {
-  const confirmed = window.confirm(
-    "Are you sure you want to cancel this subscription?"
-  )
-
-  if (!confirmed) return
-
-  try {
-  const response = await fetch(
-    apiUrl(`/api/subscriptions/${subscriptionId}/cancel`),
-    {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    }
-  )
-
-    const data = await response.json()
-
-    if (!response.ok) {
-      throw new Error(
-        data.error || "Unable to cancel subscription."
-      )
-    }
-
-    setSubscriptions((currentSubscriptions) =>
-      currentSubscriptions.map((subscription) =>
-        subscription.id === subscriptionId
-          ? {
-              ...subscription,
-              subscription_status: "CANCELLED",
-            }
-          : subscription
-      )
-    )
-  } catch (error) {
-    console.error(error)
-    alert(error.message || "Something went wrong.")
+    return new Date(date).toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    })
   }
-}
+
+  const handleCancel = async (subscriptionId) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to cancel this subscription?"
+    )
+
+    if (!confirmed) return
+
+    try {
+      const response = await fetch(
+        apiUrl(`/api/subscriptions/${subscriptionId}/cancel`),
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      )
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(
+          data.error || "Unable to cancel subscription."
+        )
+      }
+
+      setSubscriptions((currentSubscriptions) =>
+        currentSubscriptions.map((subscription) =>
+          subscription.id === subscriptionId
+            ? {
+                ...subscription,
+                subscription_status: "CANCELLED",
+              }
+            : subscription
+        )
+      )
+    } catch (error) {
+      console.error("Cancel subscription error:", error)
+
+      alert(
+        error.message || "Something went wrong."
+      )
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[#f8faf7]">
       <div className="mx-auto max-w-5xl px-5 py-8">
 
-        {/* Back */}
         <button
           onClick={onBack}
           className="mb-6 text-sm font-semibold text-green-700 transition hover:text-green-900"
@@ -129,7 +139,6 @@ const handleCancel = async (subscriptionId) => {
           ← Back to Home
         </button>
 
-        {/* Header */}
         <div className="mb-8">
           <p className="text-sm font-semibold uppercase tracking-wider text-green-700">
             My Account
@@ -144,7 +153,6 @@ const handleCancel = async (subscriptionId) => {
           </p>
         </div>
 
-        {/* Loading */}
         {loading && (
           <div className="rounded-3xl bg-white p-8 text-center shadow-sm">
             <div className="text-3xl">🥗</div>
@@ -155,7 +163,6 @@ const handleCancel = async (subscriptionId) => {
           </div>
         )}
 
-        {/* Error */}
         {!loading && error && (
           <div className="rounded-3xl bg-red-50 p-6 text-red-700">
             <p className="font-semibold">
@@ -168,7 +175,6 @@ const handleCancel = async (subscriptionId) => {
           </div>
         )}
 
-        {/* Empty */}
         {!loading && !error && subscriptions.length === 0 && (
           <div className="rounded-3xl bg-white p-10 text-center shadow-sm">
             <div className="text-5xl">🌱</div>
@@ -184,7 +190,6 @@ const handleCancel = async (subscriptionId) => {
           </div>
         )}
 
-        {/* Subscriptions */}
         {!loading && !error && subscriptions.length > 0 && (
           <div className="space-y-6">
 
@@ -194,7 +199,6 @@ const handleCancel = async (subscriptionId) => {
                 className="overflow-hidden rounded-3xl bg-white shadow-sm transition hover:shadow-lg"
               >
 
-                {/* Top */}
                 <div className="border-b border-gray-100 p-6 md:p-7">
                   <div className="flex flex-col justify-between gap-5 md:flex-row md:items-center">
 
@@ -208,52 +212,60 @@ const handleCancel = async (subscriptionId) => {
                       </h2>
 
                       <p className="mt-1 text-gray-500">
-                        {subscription.duration_days} days plan
+                        {subscription.duration_days || 30} days plan
                       </p>
                     </div>
 
                     <div className="text-left md:text-right">
+
                       <p className="text-3xl font-extrabold text-green-700">
-                        ₹{Number(subscription.plan_price).toFixed(2)}
+                        ₹
+                        {Number(
+                          subscription.plan_price
+                        ).toLocaleString("en-IN")}
                       </p>
 
                       <div className="mt-3 flex flex-wrap gap-2 md:justify-end">
 
                         <span
-                            className={`rounded-full px-3 py-1.5 text-xs font-bold ${getPaymentStyle(
+                          className={`rounded-full px-3 py-1.5 text-xs font-bold ${getPaymentStyle(
                             subscription.payment_status
-                            )}`}
+                          )}`}
                         >
-                            💳 Payment: {subscription.payment_status}
+                          💳 Payment:{" "}
+                          {subscription.payment_status}
                         </span>
 
                         <span
-                            className={`rounded-full px-3 py-1.5 text-xs font-bold ${getSubscriptionStyle(
+                          className={`rounded-full px-3 py-1.5 text-xs font-bold ${getSubscriptionStyle(
                             subscription.subscription_status
-                            )}`}
+                          )}`}
                         >
-                            📌 Subscription: {subscription.subscription_status}
+                          📌 Subscription:{" "}
+                          {subscription.subscription_status}
                         </span>
 
-                        </div>
-                        {["PENDING", "ACTIVE"].includes(
-                        subscription.subscription_status
-                        ) && (
-                        <div className="mt-4 md:text-right">
-                            <button
-                            onClick={() => handleCancel(subscription.id)}
-                            className="rounded-full border border-red-300 px-4 py-2 text-sm font-bold text-red-600 transition hover:bg-red-50"
-                            >
-                            Cancel Subscription
-                            </button>
-                        </div>
-                        )}
-                    </div>
+                      </div>
 
+                      {["PENDING", "ACTIVE"].includes(
+                        subscription.subscription_status
+                      ) && (
+                        <div className="mt-4 md:text-right">
+                          <button
+                            onClick={() =>
+                              handleCancel(subscription.id)
+                            }
+                            className="rounded-full border border-red-300 px-4 py-2 text-sm font-bold text-red-600 transition hover:bg-red-50"
+                          >
+                            Cancel Subscription
+                          </button>
+                        </div>
+                      )}
+
+                    </div>
                   </div>
                 </div>
 
-                {/* Details */}
                 <div className="grid gap-5 p-6 md:grid-cols-2 md:p-7">
 
                   <div className="rounded-2xl bg-gray-50 p-5">
@@ -282,12 +294,11 @@ const handleCancel = async (subscriptionId) => {
                     </p>
 
                     <p className="mt-2 font-medium text-gray-800">
-                      {subscription.delivery_address}
+                      {subscription.delivery_address || "-"}
                     </p>
                   </div>
 
                 </div>
-
               </div>
             ))}
 

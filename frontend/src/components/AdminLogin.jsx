@@ -1,23 +1,43 @@
 import { useState } from "react"
-
+import { apiUrl } from "../api"
 function AdminLogin({ onLogin, onBack }) {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
 
-  const handleLogin = (event) => {
-    event.preventDefault()
+  const handleLogin = async (event) => {
+  event.preventDefault()
+  setError("")
 
-    // Temporary development credentials.
-    // We will move authentication to the Flask backend later.
-    if (username === "admin" && password === "admin123") {
-      setError("")
-      onLogin()
-      return
+  try {
+    const response = await fetch(
+      apiUrl("/api/admin/login"),
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: username,
+          password,
+        }),
+      }
+    )
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      throw new Error(data.error || "Invalid admin credentials.")
     }
 
-    setError("Invalid username or password.")
+    localStorage.setItem("adminToken", data.token)
+
+    onLogin()
+  } catch (error) {
+    console.error(error)
+    setError(error.message || "Unable to login.")
   }
+}
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#f8faf5] px-5">

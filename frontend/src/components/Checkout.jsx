@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-
+import { apiUrl } from "../api"
 function Checkout({ cart, customer, onBack, onOrderConfirmed }) {
   const [customerName, setCustomerName] = useState(customer?.name || "")
   const [phone, setPhone] = useState(customer?.phone || "")

@@ -7,4 +7,17 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+
+  server: {
+    allowedHosts: [
+      'gumdrop-sappy-nullify.ngrok-free.dev',
+    ],
+
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:5000',
+        changeOrigin: true,
+      },
+    },
+  },
 })

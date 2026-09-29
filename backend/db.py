@@ -1,5 +1,4 @@
 import os
-
 import mysql.connector
 from dotenv import load_dotenv
 
@@ -7,6 +6,12 @@ load_dotenv()
 
 
 def get_db_connection():
+
+    print("DB HOST:", os.getenv("DB_HOST"))
+    print("DB PORT:", os.getenv("DB_PORT"))
+    print("DB USER:", os.getenv("DB_USER"))
+    print("DB NAME:", os.getenv("DB_NAME"))
+
     return mysql.connector.connect(
         host=os.getenv("DB_HOST"),
         port=int(os.getenv("DB_PORT", "3306")),

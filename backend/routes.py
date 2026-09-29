@@ -1,6 +1,6 @@
 import os
 from datetime import datetime, timedelta
-
+from flask import Flask, request, jsonify
 from flask import Blueprint, jsonify, request
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
@@ -434,6 +434,95 @@ def get_customer_profile(customer_id):
         cursor.close()
         db.close()
 
+# ============================================================
+# CREATE CUSTOMER - ADMIN
+# ============================================================
+
+@products_bp.route(
+    "/api/admin/customers",
+    methods=["POST"]
+)
+def create_customer_admin():
+
+    if not get_authenticated_admin():
+        return jsonify({
+            "error": "Unauthorized"
+        }), 401
+
+    data = request.get_json() or {}
+
+    name = data.get("name", "").strip()
+    email = data.get("email", "").strip()
+    phone = data.get("phone", "").strip()
+    password = data.get("password", "").strip()
+    address = data.get("address", "").strip()
+
+    if not name or not email or not phone or not password:
+        return jsonify({
+            "error": "Name, email, phone, and password are required."
+        }), 400
+
+    db = get_db_connection()
+    cursor = db.cursor(dictionary=True)
+
+    try:
+
+        # Check whether email already exists
+        cursor.execute(
+            """
+            SELECT id
+            FROM customers
+            WHERE email = %s
+            """,
+            (email,)
+        )
+
+        existing_customer = cursor.fetchone()
+
+        if existing_customer:
+            return jsonify({
+                "error": "A customer with this email already exists."
+            }), 409
+
+        password_hash = generate_password_hash(password)
+
+        cursor.execute(
+            """
+            INSERT INTO customers
+            (name, email, phone, password_hash, address)
+            VALUES (%s, %s, %s, %s, %s)
+            """,
+            (
+                name,
+                email,
+                phone,
+                password_hash,
+                address
+            )
+        )
+
+        customer_id = cursor.lastrowid
+
+        db.commit()
+
+        return jsonify({
+            "message": "Customer created successfully",
+            "customer_id": customer_id
+        }), 201
+
+    except Exception as error:
+
+        db.rollback()
+
+        return jsonify({
+            "error": str(error)
+        }), 500
+
+    finally:
+
+        cursor.close()
+        db.close()
+
 
 # ============================================================
 # UPDATE CUSTOMER PROFILE
@@ -579,6 +668,41 @@ def get_products():
 
     finally:
 
+        cursor.close()
+        db.close()
+
+@products_bp.route("/api/subscription-plans", methods=["GET"])
+def get_subscription_plans():
+    db = get_db_connection()
+    cursor = db.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT
+                id,
+                name,
+                category,
+                description,
+                size,
+                duration,
+                price,
+                is_active
+            FROM subscription_plans
+            WHERE is_active = TRUE
+            ORDER BY id ASC
+        """)
+
+        plans = cursor.fetchall()
+
+        return jsonify(plans), 200
+
+    except Exception as error:
+        print("Subscription plans error:", error)
+        return jsonify({
+            "error": "Unable to load subscription plans"
+        }), 500
+
+    finally:
         cursor.close()
         db.close()
 
@@ -1150,6 +1274,74 @@ def verify_payment():
 )
 def get_order(order_id):
 
+    authenticated_admin = get_authenticated_admin()
+
+    # If admin is authenticated, allow admin to view any order
+    if authenticated_admin:
+
+        db = get_db_connection()
+        cursor = db.cursor(dictionary=True)
+
+        try:
+
+            cursor.execute(
+                """
+                SELECT
+                    id,
+                    customer_id,
+                    customer_name,
+                    phone,
+                    address,
+                    total_amount,
+                    payment_status,
+                    order_status,
+                    created_at
+                FROM orders
+                WHERE id = %s
+                """,
+                (order_id,)
+            )
+
+            order = cursor.fetchone()
+
+            if not order:
+                return jsonify({
+                    "error": "Order not found"
+                }), 404
+
+            cursor.execute(
+                """
+                SELECT
+                    id,
+                    product_id,
+                    product_name,
+                    quantity,
+                    price
+                FROM order_items
+                WHERE order_id = %s
+                ORDER BY id ASC
+                """,
+                (order_id,)
+            )
+
+            items = cursor.fetchall()
+
+            order["items"] = items
+
+            return jsonify(order), 200
+
+        except Exception as error:
+
+            return jsonify({
+                "error": str(error)
+            }), 500
+
+        finally:
+
+            cursor.close()
+            db.close()
+
+    # Otherwise, allow the customer to view their own order
     authenticated_customer_id = get_authenticated_customer()
 
     if not authenticated_customer_id:
@@ -1191,8 +1383,6 @@ def get_order(order_id):
                 "error": "Order not found"
             }), 404
 
-        # Paid orders ARE allowed to be viewed/tracked.
-
         cursor.execute(
             """
             SELECT
@@ -1224,7 +1414,6 @@ def get_order(order_id):
 
         cursor.close()
         db.close()
-
 
 # ============================================================
 # GET CUSTOMER ORDERS
