@@ -14,15 +14,17 @@ CORS(
     resources={
         r"/api/*": {
             "origins": [
-    "https://happy-with-healthy.onrender.com",
-    "http://localhost:5173",
-    "http://127.0.0.1:5173"
-],
+                "https://happy-with-healthy.vercel.app",
+                "https://happy-with-healthy.onrender.com",
+                "http://localhost:5173",
+                "http://127.0.0.1:5173"
+            ],
             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
             "allow_headers": ["Content-Type", "Authorization"],
         }
     },
 )
+
 @app.before_request
 def handle_preflight():
     if request.method == "OPTIONS":
