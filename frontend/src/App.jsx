@@ -261,6 +261,48 @@ function App() {
   const location = useLocation()
   const [cart, setCart] = useState([])
   const [customer, setCustomer] = useState(null)
+  useEffect(() => {
+  const restoreCustomer = async () => {
+    const token = localStorage.getItem("token")
+
+    if (!token) {
+      return
+    }
+
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]))
+      const customerId = payload.customer_id
+
+      if (!customerId) {
+        localStorage.removeItem("token")
+        return
+      }
+
+      const response = await fetch(
+        apiUrl(`/api/customers/${customerId}`),
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      if (!response.ok) {
+        localStorage.removeItem("token")
+        return
+      }
+
+      const data = await response.json()
+
+      setCustomer(data)
+    } catch (error) {
+      console.error("Unable to restore customer:", error)
+      localStorage.removeItem("token")
+    }
+  }
+
+  restoreCustomer()
+}, [])
   const [favorites, setFavorites] = useState([])
   const [favoritesOpen, setFavoritesOpen] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState(null)
@@ -290,7 +332,13 @@ function App() {
   const [accountMenuOpen, setAccountMenuOpen] = useState(false)
 
   useEffect(() => {
-    const loadProducts = async () => {
+  if (!customer) {
+    setProducts([])
+    setLoading(false)
+    return
+  }
+
+  const loadProducts = async () => {
       try {
         setLoading(true)
         setError("")
@@ -334,7 +382,7 @@ function App() {
     }
 
     loadProducts()
-  }, [])
+  }, [customer])
 
   useEffect(() => {
     if (!customer?.id) {
@@ -477,15 +525,20 @@ function App() {
   }
 
   const openMenu = () => {
-    setShowMenu(true)
-
-    setTimeout(() => {
-      document.getElementById("menu")?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      })
-    }, 100)
+  if (!customer) {
+    setAuthPage("login")
+    return
   }
+
+  setShowMenu(true)
+
+  setTimeout(() => {
+    document.getElementById("menu")?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    })
+  }, 100)
+}
 
   const logoutCustomer = () => {
     localStorage.removeItem("token")
@@ -852,7 +905,14 @@ function App() {
             </button>
 
             <button
-              onClick={() => setSubscriptionOpen(true)}
+              onClick={() => {
+                if (!customer) {
+                  setAuthPage("login")
+                  return
+                }
+
+                setSubscriptionOpen(true)
+              }}
               className="font-medium text-gray-600 transition hover:text-green-700"
             >
               Plans
@@ -1157,8 +1217,8 @@ function App() {
 
       {/* ================= MENU ================= */}
 
-      {showMenu && (
-        <>
+      {showMenu && customer && (
+  <>
 
           {/* CATEGORIES */}
           <section className="mx-auto max-w-7xl px-5 py-14">
@@ -1323,6 +1383,11 @@ function App() {
                       <div
                         key={food.id}
                         onClick={() => {
+                          if (!customer) {
+                            setAuthPage("login")
+                            return
+                          }
+
                           setSelectedProduct(food)
                           setProductQuantity(1)
                         }}

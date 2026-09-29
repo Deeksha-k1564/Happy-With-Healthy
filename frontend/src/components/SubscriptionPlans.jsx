@@ -14,35 +14,46 @@ function SubscriptionPlans({
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
 
-  // Realistic food images for subscription plans
-  const planImages = {
-    Basic:
-      "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=900&q=85",
-
-    Standard:
-      "https://images.unsplash.com/photo-1512621776951-a57141eefd?auto=format&fit=crop&w=900&q=85",
-
-    Premium:
-      "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=85",
-  }
-
-  // Fallback images based on plan name
   const getPlanImage = (plan) => {
-    const name = (plan?.name || "").toLowerCase()
+  const name = (plan?.name || "").toLowerCase().trim()
 
-    if (name.includes("premium")) {
-      return planImages.Premium
-    }
+  const images = {
+    "basic plan - 200g":
+  "https://www.acouplecooks.com/wp-content/uploads/2025/04/Mediterranean-Rice-Bowls-0002.jpg",
 
-    if (
-      name.includes("standard") ||
-      name.includes("regular")
-    ) {
-      return planImages.Standard
-    }
+    "basic plan - 250g":
+  "https://www.eatingwell.com/thmb/eyM3uZIXNqgDVKdcGUzFoYDiBfY=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/Chickpea-FarroGrainBowl-beauty-27930_preview_maxWidth_4000_maxHeight_4000_ppi_300_quality_100-e40b45a8518741118e8fc560da21cf8e.jpg",
 
-    return planImages.Basic
+    "basic plan - 300g":
+      "https://cdn.loveandlemons.com/wp-content/uploads/2023/01/sushi-bowl-1.jpg",
+
+    "detox drinks":
+      "https://www.healthtoday.com/wp-content/uploads/2023/08/detox-drinks_5_healthtoday-1-jpg.webp",
+
+    "protein power bowl":
+      "https://easyandcozyrecipes.com/wp-content/uploads/2025/12/Cottage-Cheese-Protein-Power-Bowl-with-soft-eggs-avocado-cherry-tomatoes-and-chickpeas.webp",
+
+    "oats & smoothies - plan 1":
+      "https://www.theconsciousplantkitchen.com/wp-content/uploads/2022/11/Blended-Oats-1.jpg",
+
+    "protein salad - 250g":
+      "https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?auto=format&fit=crop&w=900&q=85",
+
+    "protein salad - 300g":
+      "https://www.eatingwell.com/thmb/ktgT2Kpr7IxqAZdE3sI5t9QE2Ck=/750x0/filters:no_upscale():max_bytes(150000):strip_icc()/chopped-power-salad-with-chicken-0ad93f1931524a679c0f8854d74e6e57.jpg",
+
+    "protein salad collection":
+      "https://cdn-aboak.nitrocdn.com/QJsLnWfsWAiuukSIMowyVEHtotvSQZoR/assets/images/optimized/rev-ca18e1d/www.slenderkitchen.com/sites/default/files/styles/body_1500/public/media/protein-packed-salad-bowl-3.jpg",
+
+    "oats & smoothies - plan 2":
+      "https://dailycookingco.com/wp-content/uploads/2026/03/Apple-pie-smoothie-with-cinnamon-and-oats.jpeg",
   }
+
+  return (
+    images[name] ||
+    "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=900&q=85"
+  )
+}
 
   useEffect(() => {
     fetch(apiUrl("/api/subscription-plans"))
@@ -373,8 +384,7 @@ function SubscriptionPlans({
                       alt={`${plan.name} healthy meals`}
                       className="h-full w-full object-cover transition duration-500 group-hover:scale-110"
                       onError={(event) => {
-                        event.currentTarget.src =
-                          "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=900&q=85"
+                        event.currentTarget.style.display = "none"
                       }}
                     />
 
