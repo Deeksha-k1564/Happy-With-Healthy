@@ -11,18 +11,9 @@ app.config["JWT_SECRET_KEY"] = os.getenv(
 )
 CORS(
     app,
-    resources={
-        r"/api/*": {
-            "origins": [
-                "https://happy-with-healthy.vercel.app",
-                "https://happy-with-healthy.onrender.com",
-                "http://localhost:5173",
-                "http://127.0.0.1:5173"
-            ],
-            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-            "allow_headers": ["Content-Type", "Authorization"],
-        }
-    },
+    resources={r"/api/*": {"origins": "*"}},
+    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
 )
 
 @app.before_request
