@@ -90,9 +90,16 @@ function SubscriptionPlans({
     }
 
     if (!startDate) {
-      setError("Please select a start date.")
-      return
-    }
+  setError("Please select a start date.")
+  return
+}
+
+const formattedStartDate = String(startDate).trim()
+
+if (!/^\d{4}-\d{2}-\d{2}$/.test(formattedStartDate)) {
+  setError("Invalid start date. Please select the date again.")
+  return
+}
 
     if (!address.trim()) {
       setError("Please enter your delivery address.")
@@ -116,7 +123,7 @@ function SubscriptionPlans({
             plan_name: selectedPlan.name,
             plan_price: selectedPlan.price,
             duration_days: selectedPlan.duration || 30,
-            start_date: startDate,
+            start_date: formattedStartDate,
             delivery_address: address.trim(),
           }),
         }
